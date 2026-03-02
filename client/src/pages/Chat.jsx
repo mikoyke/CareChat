@@ -10,6 +10,8 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [editingConvId, setEditingConvId] = useState(null);
+  const [editingTitle, setEditingTitle] = useState("");
   const messagesEndRef = useRef(null);
 
   // 页面加载时获取所有对话
@@ -45,6 +47,14 @@ export default function Chat() {
   };
 
   const createNewConversation = async () => {
+    const emptyConv = conversations.find(
+      (conv) => conv.title === "New Conversation",
+    );
+    if (emptyConv) {
+      selectConversation(emptyConv.id);
+      return;
+    }
+
     try {
       const res = await api.post("/chat/conversations", {
         title: "New Conversation",
@@ -60,6 +70,20 @@ export default function Chat() {
   const sendMessage = async () => {
     if (!input.trim() || isStreaming || !currentConvId) return;
 
+    if (messages.length === 0) {
+      const title = input.slice(0, 40) + (input.length > 40 ? "..." : "");
+      try {
+        await api.patch(`/chat/conversations/${currentConvId}`, { title });
+        setConversations((prev) =>
+          prev.map((conv) =>
+            conv.id === currentConvId ? { ...conv, title } : conv,
+          ),
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
     const userMessage = {
       role: "user",
       content: input,
@@ -71,10 +95,11 @@ export default function Chat() {
     setIsStreaming(true);
 
     // 先加一条空的 AI 消息
+    const aiTempId = `temp-ai-${Date.now()}`;
     const aiMessage = {
       role: "assistant",
       content: "",
-      tempId: `temp-ai-${Date.now()}`,
+      tempId: aiTempId,
     };
     setMessages((prev) => [...prev, aiMessage]);
 
@@ -127,8 +152,8 @@ export default function Chat() {
               setMessages((prev) => {
                 const updated = [...prev];
                 //用tempId而不是lastIndex更精确定位
-                const idx = updated.findIndex((m) => m.tempId === tempId);
-                if (idx === -1) return prev; //
+                const idx = updated.findIndex((m) => m.tempId === aiTempId);
+                if (idx === -1) return prev;
 
                 updated[idx] = {
                   ...updated[idx],
@@ -147,8 +172,48 @@ export default function Chat() {
       setIsStreaming(false);
     }
   };
+
+  const deleteConversation = async (convId) => {
+    try {
+      await api.delete(`/chat/conversations/${convId}`);
+      setConversations((prev) => prev.filter((conv) => conv.id !== convId));
+
+      // 如果删的是当前对话，切换到第一个
+      if (convId === currentConvId) {
+        const remaining = conversations.filter((conv) => conv.id !== convId);
+        if (remaining.length > 0) {
+          selectConversation(remaining[0].id);
+        } else {
+          setCurrentConvId(null);
+          setMessages([]);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const startEditTitle = (conv) => {
+    setEditingConvId(conv.id);
+    setEditingTitle(conv.title);
+  };
+  const saveTitle = async (convId) => {
+    if (!editingTitle.trim()) return;
+    try {
+      await api.patch(`/chat/conversations/${convId}`, { title: editingTitle });
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === convId ? { ...conv, title: editingTitle } : conv,
+        ),
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setEditingConvId(null);
+    }
+  };
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
       sendMessage();
     }
@@ -175,13 +240,58 @@ export default function Chat() {
 
         <div className="flex-1 overflow-y-auto p-3 space-y-1">
           {conversations.map((conv) => (
-            <button
+            <div
               key={conv.id}
-              onClick={() => selectConversation(conv.id)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${currentConvId === conv.id ? "bg-slate-700 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}
+              className={`group flex items-center justify-between rounded-lg px-3 py-2 transition ${
+                currentConvId === conv.id
+                  ? "bg-slate-700"
+                  : "hover:bg-slate-800"
+              }`}
             >
-              {conv.title}
-            </button>
+              {editingConvId === conv.id ? (
+                // 编辑模式：显示输入框
+                <input
+                  autoFocus
+                  value={editingTitle}
+                  onChange={(e) => setEditingTitle(e.target.value)}
+                  onBlur={() => saveTitle(conv.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveTitle(conv.id);
+                    if (e.key === "Escape") setEditingConvId(null);
+                  }}
+                  className="flex-1 bg-slate-600 text-white text-sm rounded px-2 py-0.5 outline-none"
+                />
+              ) : (
+                // 正常模式：显示标题
+                <button
+                  onClick={() => selectConversation(conv.id)}
+                  className={`flex-1 text-left text-sm truncate ${
+                    currentConvId === conv.id
+                      ? "text-white"
+                      : "text-slate-400 group-hover:text-white"
+                  }`}
+                >
+                  {conv.title}
+                </button>
+              )}
+
+              {editingConvId !== conv.id && (
+                <div className="flex items-center ml-2 opacity-0 group-hover:opacity-100 transition">
+                  <button
+                    onClick={() => startEditTitle(conv)}
+                    className="text-slate-500 hover:text-blue-400 text-xs mr-1"
+                  >
+                    ✎
+                  </button>
+                  <button
+                    onClick={() => deleteConversation(conv.id)}
+                    className="text-slate-500 hover:text-red-400 text-xs"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
