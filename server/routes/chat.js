@@ -75,14 +75,15 @@ router.post("/message", authenticate, async (req, res) => {
     res.end();
 
     //8.把完整的 AI 回答存入数据库
-    const usage = stream._request.id ? null : null;
     await pool.query(
       `INSERT INTO messages (conversation_id, role, content) VALUES ($1, $2, $3)`,
       [conversationId, "assistant", fullResponse],
     );
   } catch (err) {
     console.error("Chat error:", err);
-    res.status(500).json({ error: "Chat error" });
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Chat error" });
+    }
   }
 });
 
@@ -110,7 +111,7 @@ router.get("/conversations", authenticate, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT * FROM conversations WHERE user_id = $1 ORDER BY created_at DESC`,
-      [user_id],
+      [userId],
     );
     res.json(result.rows);
   } catch (err) {
