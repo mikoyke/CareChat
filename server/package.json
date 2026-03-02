@@ -12,12 +12,17 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@langchain/community": "^1.1.21",
+    "@langchain/openai": "^1.2.11",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
+    "langchain": "^1.2.28",
+    "multer": "^2.1.0",
     "openai": "^6.25.0",
+    "pdf-parse": "^2.4.5",
     "pg": "^8.19.0"
   },
   "devDependencies": {
