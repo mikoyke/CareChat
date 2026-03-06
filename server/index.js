@@ -4,7 +4,6 @@ require("dotenv").config();
 
 const app = express();
 
-app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 
 app.use("/api/auth", require("./routes/auth"));
@@ -12,6 +11,17 @@ app.use("/api/chat", require("./routes/chat"));
 app.use("/api/documents", require("./routes/documents"));
 
 const { authenticate, authorize } = require("./middleware/auth");
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  }),
+);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: " Carechat server is running" });
