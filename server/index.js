@@ -7,9 +7,10 @@ const app = express();
 app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 
-app.use("/api/chat", require("./routes/chat"));
-
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/chat", require("./routes/chat"));
+app.use("/api/documents", require("./routes/documents"));
+
 const { authenticate, authorize } = require("./middleware/auth");
 
 app.get("/api/health", (req, res) => {

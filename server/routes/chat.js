@@ -2,6 +2,7 @@ const express = require("express");
 const OpenAI = require("openai");
 const pool = require("../db");
 const { authenticate } = require("../middleware/auth");
+const { buildRagContext } = require("../services/ragService");
 const router = express.Router();
 
 const openai = new OpenAI({
@@ -72,10 +73,11 @@ router.post("/message", authenticate, async (req, res) => {
     );
 
     const history = historyResult.rows;
+    const ragContext = await buildRagContext(content, userRole);
 
     // 2. 构建发给 OpenAI 的消息数组
     const messages = [
-      { role: "system", content: getSystemPrompt(userRole) },
+      { role: "system", content: getSystemPrompt(userRole) + ragContext },
       ...history,
       { role: "user", content },
     ];
