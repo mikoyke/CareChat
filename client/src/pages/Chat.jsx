@@ -105,7 +105,9 @@ export default function Chat() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3001/api/chat/message", {
+      const baseURL =
+        import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+      const response = await fetch(`${baseURL}/chat/message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
