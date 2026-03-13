@@ -38,12 +38,16 @@ function normalizeText(text) {
 router.post(
   "/upload",
   authenticate,
-  authorize("nurse", "crc"),
+  authorize("admin"),
   upload.single("file"),
   async (req, res) => {
     const client = await pool.connect();
     try {
-      const role = req.user.role;
+      const targetRole = req.body.targetRole;
+      if (!["nurse", "crc"].includes(targetRole)) {
+        return res.status(400).json({ error: "targetRole must be nurse or crc" });
+      }
+      const role = targetRole;
       const file = req.file;
 
       if (!file) return res.status(400).json({ error: "No file uploaded" });
@@ -153,22 +157,20 @@ router.post(
   },
 );
 
-// 列出当前角色的所有文档（按文件名聚合）
-router.get("/", authenticate, async (req, res) => {
-  const { role } = req.user;
+// 列出所有文档（仅 admin）
+router.get("/", authenticate, authorize("admin"), async (_req, res) => {
   try {
     const result = await pool.query(
       `SELECT
+        role,
         metadata->>'source'               AS source,
         metadata->>'mimetype'             AS mimetype,
         MAX((metadata->>'size')::integer) AS size,
         MIN(metadata->>'uploadedAt')      AS uploaded_at,
         COUNT(*)::integer                 AS chunk_count
       FROM documents
-      WHERE role = $1
-      GROUP BY metadata->>'source', metadata->>'mimetype'
-      ORDER BY MIN(metadata->>'uploadedAt') DESC`,
-      [role],
+      GROUP BY role, metadata->>'source', metadata->>'mimetype'
+      ORDER BY role, MIN(metadata->>'uploadedAt') DESC`,
     );
     res.json(result.rows);
   } catch (err) {
@@ -177,13 +179,15 @@ router.get("/", authenticate, async (req, res) => {
   }
 });
 
-// 删除某个文档的所有 chunks
-router.delete("/", authenticate, authorize("nurse", "crc"), async (req, res) => {
-  const { source } = req.query;
-  const { role } = req.user;
+// 删除某个文档的所有 chunks（仅 admin）
+router.delete("/", authenticate, authorize("admin"), async (req, res) => {
+  const { source, role } = req.query;
 
-  if (!source) {
-    return res.status(400).json({ error: "source query param is required" });
+  if (!source || !role) {
+    return res.status(400).json({ error: "source and role query params are required" });
+  }
+  if (!["nurse", "crc"].includes(role)) {
+    return res.status(400).json({ error: "role must be nurse or crc" });
   }
 
   try {

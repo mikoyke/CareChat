@@ -248,12 +248,14 @@ export default function Chat() {
           >
             + New Conversation
           </button>
-          <button
-            onClick={() => navigate("/documents")}
-            className="w-full text-left text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg px-3 py-2 text-sm transition mt-1"
-          >
-            Knowledge Base
-          </button>
+          {user?.role === "admin" && (
+            <button
+              onClick={() => navigate("/documents")}
+              className="w-full text-left text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg px-3 py-2 text-sm transition mt-1"
+            >
+              Knowledge Base
+            </button>
+          )}
           {user?.role === "admin" && (
             <button
               onClick={() => navigate("/prompt")}
