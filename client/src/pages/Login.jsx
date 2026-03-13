@@ -15,8 +15,12 @@ export default function Login() {
     try {
       const user = await login(email, password);
       navigate("/chat");
-    } catch {
-      setError("Invalid email or password");
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setError("Invalid email or password");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     }
   };
 

@@ -66,7 +66,8 @@ router.post("/login", async (req, res) => {
         role: user.role,
       },
     });
-  } catch {
+  } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -79,7 +80,8 @@ router.get("/me", authenticate, async (req, res) => {
       [req.user.id],
     );
     res.json(result.rows[0]);
-  } catch {
+  } catch (err) {
+    console.error("Me error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });

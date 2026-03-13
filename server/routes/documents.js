@@ -1,7 +1,6 @@
 const express = require("express");
 const multer = require("multer");
 const pdfParse = require("pdf-parse");
-const { OpenAIEmbeddings } = require("@langchain/openai");
 const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
 const pool = require("../db");
 const { authenticate, authorize } = require("../middleware/auth");
@@ -44,11 +43,10 @@ router.post(
   async (req, res) => {
     const client = await pool.connect();
     try {
-      const { role } = req.body;
+      const role = req.user.role;
       const file = req.file;
 
       if (!file) return res.status(400).json({ error: "No file uploaded" });
-      if (!role) return res.status(400).json({ error: "Role is required" });
 
       // 1. 提取文本
       let text = "";
@@ -154,6 +152,51 @@ router.post(
     }
   },
 );
+
+// 列出当前角色的所有文档（按文件名聚合）
+router.get("/", authenticate, async (req, res) => {
+  const { role } = req.user;
+  try {
+    const result = await pool.query(
+      `SELECT
+        metadata->>'source'               AS source,
+        metadata->>'mimetype'             AS mimetype,
+        MAX((metadata->>'size')::integer) AS size,
+        MIN(metadata->>'uploadedAt')      AS uploaded_at,
+        COUNT(*)::integer                 AS chunk_count
+      FROM documents
+      WHERE role = $1
+      GROUP BY metadata->>'source', metadata->>'mimetype'
+      ORDER BY MIN(metadata->>'uploadedAt') DESC`,
+      [role],
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("List documents error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// 删除某个文档的所有 chunks
+router.delete("/", authenticate, authorize("nurse", "crc"), async (req, res) => {
+  const { source } = req.query;
+  const { role } = req.user;
+
+  if (!source) {
+    return res.status(400).json({ error: "source query param is required" });
+  }
+
+  try {
+    const result = await pool.query(
+      "DELETE FROM documents WHERE metadata->>'source' = $1 AND role = $2",
+      [source, role],
+    );
+    res.json({ deleted: result.rowCount });
+  } catch (err) {
+    console.error("Delete document error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 // 搜索相关文档
 router.post("/search", authenticate, async (req, res) => {

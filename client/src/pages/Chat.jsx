@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import MessageBubble from "../components/MessageBubble";
 import api from "../api/axios";
 
 export default function Chat() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
   const [currentConvId, setCurrentConvId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -178,18 +180,19 @@ export default function Chat() {
   const deleteConversation = async (convId) => {
     try {
       await api.delete(`/chat/conversations/${convId}`);
-      setConversations((prev) => prev.filter((conv) => conv.id !== convId));
 
-      // 如果删的是当前对话，切换到第一个
-      if (convId === currentConvId) {
-        const remaining = conversations.filter((conv) => conv.id !== convId);
-        if (remaining.length > 0) {
-          selectConversation(remaining[0].id);
-        } else {
-          setCurrentConvId(null);
-          setMessages([]);
+      setConversations((prev) => {
+        const remaining = prev.filter((conv) => conv.id !== convId);
+        if (convId === currentConvId) {
+          if (remaining.length > 0) {
+            selectConversation(remaining[0].id);
+          } else {
+            setCurrentConvId(null);
+            setMessages([]);
+          }
         }
-      }
+        return remaining;
+      });
     } catch (err) {
       console.error(err);
     }
@@ -237,6 +240,12 @@ export default function Chat() {
             className="w-full bg-blue-600 text-white rounded-lg py-2 text-sm hover:bg-blue-700 transition"
           >
             + New Conversation
+          </button>
+          <button
+            onClick={() => navigate("/documents")}
+            className="w-full text-left text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg px-3 py-2 text-sm transition mt-1"
+          >
+            Knowledge Base
           </button>
         </div>
 

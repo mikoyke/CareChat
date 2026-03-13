@@ -6,7 +6,7 @@ const { buildRagContext } = require("../services/ragService");
 const router = express.Router();
 
 const openai = new OpenAI({
-  apikey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 // 系统提示词，根据角色返回不同内容
@@ -165,12 +165,21 @@ router.get("/conversations/:id/messages", authenticate, async (req, res) => {
   const { id: conversationId } = req.params;
 
   try {
+    const ownerCheck = await pool.query(
+      "SELECT id FROM conversations WHERE id = $1 AND user_id = $2",
+      [conversationId, req.user.id],
+    );
+    if (ownerCheck.rows.length === 0) {
+      return res.status(404).json({ error: "Conversation not found" });
+    }
+
     const result = await pool.query(
-      ` SELECT * FROM messages WHERE conversation_id = $1 ORDER BY created_at ASC`,
+      `SELECT * FROM messages WHERE conversation_id = $1 ORDER BY created_at ASC`,
       [conversationId],
     );
     res.json(result.rows);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 });
