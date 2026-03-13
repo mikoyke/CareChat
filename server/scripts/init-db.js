@@ -10,11 +10,12 @@ async function initDB() {
     console.log("✓ pgvector extension");
 
     await client.query(`
-      DO $$ BEGIN
-        CREATE TYPE user_role AS ENUM ('nurse', 'crc');
-      EXCEPTION WHEN duplicate_object THEN NULL;
-      END $$
-    `);
+  DO $$ BEGIN
+    CREATE TYPE user_role AS ENUM ('nurse', 'crc', 'admin');
+  EXCEPTION WHEN duplicate_object THEN
+    ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'admin';
+  END $$
+`);
     console.log("✓ user_role type");
 
     await client.query(`
