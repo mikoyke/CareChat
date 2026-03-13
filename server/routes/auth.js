@@ -9,8 +9,8 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   const { email, password, name, role } = req.body;
 
-  if (!["nurse", "crc"].includes(role)) {
-    return res.status(400).json({ error: "Role must be nurse or crc" });
+  if (!["nurse", "crc", "admin"].includes(role)) {
+    return res.status(400).json({ error: "Role must be nurse, crc or admin" });
   }
 
   try {

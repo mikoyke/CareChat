@@ -9,61 +9,19 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// 系统提示词，根据角色返回不同内容
-const getSystemPrompt = (role) => {
-  if (role === "nurse") {
-    return `You are CareChat, a clinical decision support assistant for registered nurses and nursing staff.
-
-Your expertise covers:
-- Medication administration: dosing, routes, contraindications, drug interactions, safe handling
-- Nursing procedures and clinical skills: wound care, IV management, catheter care, vital sign interpretation
-- Patient assessment: ABCDE framework, early warning signs, deterioration recognition
-- Clinical guidelines: evidence-based nursing practice, infection control, fall prevention
-- Pharmacology: drug classes, mechanisms of action, nursing considerations
-
-Communication style:
-- Use precise medical terminology with brief explanations when needed
-- Structure responses clearly: indication, dosing/procedure, monitoring, patient education
-- Always include relevant contraindications and warnings
-- Cite clinical reasoning, not just facts
-- Be concise but complete — nurses are busy
-
-Safety reminders:
-- Always remind nurses to verify orders with prescribing physician for critical medications
-- Flag high-alert medications (insulin, anticoagulants, opioids, electrolytes) explicitly
-- Recommend checking institutional policy for procedures
-
-You do NOT provide definitive diagnoses. You support clinical decision-making.`;
-  } else {
-    return `You are CareChat, a clinical research operations assistant for Clinical Research Coordinators (CRCs).
-
-Your expertise covers:
-- Protocol interpretation: eligibility criteria, visit schedules, prohibited medications, protocol deviations
-- Regulatory and compliance: ICH-GCP guidelines, FDA regulations (21 CFR Parts 11, 50, 56, 312), IRB requirements
-- Adverse event management: AE vs SAE definitions, causality assessment, reporting timelines (7-day, 15-day expedited reports)
-- Informed consent: process requirements, re-consent triggers, documentation standards
-- Data management: source documentation, query resolution, eCRF completion guidelines
-- Site operations: monitoring visit preparation, TMF organization, essential documents
-
-Communication style:
-- Use clinical research terminology accurately (SAE, SUSAR, deviation, violation, waiver)
-- Reference relevant regulatory frameworks when applicable
-- Structure responses with regulatory context first, then operational guidance
-- Be precise — regulatory errors have serious consequences
-
-Safety reminders:
-- Always remind CRCs to consult their PI and sponsor for protocol-specific decisions
-- Flag situations that may require IRB notification or sponsor escalation
-- Emphasize that regulatory guidance supersedes general advice
-
-You do NOT make final regulatory decisions. You support CRC operations and compliance.`;
-  }
-};
+// 从数据库读取系统提示词
+async function getSystemPrompt(role) {
+  const result = await pool.query(
+    "SELECT content FROM prompts WHERE role = $1",
+    [role],
+  );
+  return result.rows[0]?.content || "";
+}
 
 // 发送消息，流式输出
 router.post("/message", authenticate, async (req, res) => {
   const { conversationId, content } = req.body;
-  const { id: userId, role: userRole } = req.user;
+  const { role: userRole } = req.user;
 
   try {
     //1.取出这次对话的历史消息
@@ -73,11 +31,14 @@ router.post("/message", authenticate, async (req, res) => {
     );
 
     const history = historyResult.rows;
-    const ragContext = await buildRagContext(content, userRole);
+    const [systemPrompt, ragContext] = await Promise.all([
+      getSystemPrompt(userRole),
+      buildRagContext(content, userRole),
+    ]);
 
     // 2. 构建发给 OpenAI 的消息数组
     const messages = [
-      { role: "system", content: getSystemPrompt(userRole) + ragContext },
+      { role: "system", content: systemPrompt + ragContext },
       ...history,
       { role: "user", content },
     ];
@@ -111,15 +72,16 @@ router.post("/message", authenticate, async (req, res) => {
       }
     }
 
-    // 7. 流结束，发送结束信号
-    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-    res.end();
-
-    //8.把完整的 AI 回答存入数据库
-    await pool.query(
-      `INSERT INTO messages (conversation_id, role, content) VALUES ($1, $2, $3)`,
+    //7. 把完整的 AI 回答存入数据库，拿到真实 id
+    const saved = await pool.query(
+      `INSERT INTO messages (conversation_id, role, content) VALUES ($1, $2, $3) RETURNING id`,
       [conversationId, "assistant", fullResponse],
     );
+    const messageId = saved.rows[0].id;
+
+    // 8. 流结束，把 messageId 一起发给前端
+    res.write(`data: ${JSON.stringify({ done: true, messageId })}\n\n`);
+    res.end();
   } catch (err) {
     console.error("Chat error:", err);
     if (!res.headersSent) {
@@ -219,6 +181,43 @@ router.delete("/conversations/:id", authenticate, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// 提交消息反馈（👍 / 👎）
+router.post("/messages/:id/feedback", authenticate, async (req, res) => {
+  const { id: messageId } = req.params;
+  const { rating } = req.body;
+
+  if (rating !== 1 && rating !== -1) {
+    return res.status(400).json({ error: "rating must be 1 or -1" });
+  }
+
+  try {
+    // 确认该消息属于当前用户的对话
+    const ownerCheck = await pool.query(
+      `SELECT m.id FROM messages m
+       JOIN conversations c ON c.id = m.conversation_id
+       WHERE m.id = $1 AND c.user_id = $2`,
+      [messageId, req.user.id],
+    );
+    if (ownerCheck.rows.length === 0) {
+      return res.status(404).json({ error: "Message not found" });
+    }
+
+    // 替换已有的反馈（先删后插）
+    await pool.query("DELETE FROM message_feedback WHERE message_id = $1", [
+      messageId,
+    ]);
+    await pool.query(
+      "INSERT INTO message_feedback (message_id, rating) VALUES ($1, $2)",
+      [messageId, rating],
+    );
+
+    res.json({ success: true, rating });
+  } catch (err) {
+    console.error("Feedback error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });

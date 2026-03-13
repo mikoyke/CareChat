@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
 import Documents from "./pages/Documents";
+import PromptEditor from "./pages/PromptEditor";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -47,6 +48,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Documents />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/prompt"
+            element={
+              <ProtectedRoute>
+                <PromptEditor />
               </ProtectedRoute>
             }
           />

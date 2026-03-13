@@ -149,6 +149,13 @@ export default function Chat() {
             if (data.done) {
               finished = true;
               setIsStreaming(false);
+              if (data.messageId) {
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.tempId === aiTempId ? { ...m, id: data.messageId } : m,
+                  ),
+                );
+              }
               break;
             }
 
@@ -247,6 +254,14 @@ export default function Chat() {
           >
             Knowledge Base
           </button>
+          {user?.role === "admin" && (
+            <button
+              onClick={() => navigate("/prompt")}
+              className="w-full text-left text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg px-3 py-2 text-sm transition mt-1"
+            >
+              System Prompt
+            </button>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-1">
