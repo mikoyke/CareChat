@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
+import { medicalBg } from "./Landing";
+
+const inputClass =
+  "w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -14,7 +18,7 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      const user = await login(email, password);
+      await login(email, password);
       navigate("/chat");
     } catch (err) {
       if (err.response?.status === 401) {
@@ -26,63 +30,76 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold text-slate-800 mb-1">CareChat</h1>
-        <p className="text-slate-500 mb-6">
-          AI Assistant for Clinical Professionals
-        </p>
+    <div className="min-h-screen flex items-center justify-center px-4" style={medicalBg}>
+      {/* Top accent line */}
+      <div className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 via-blue-600 to-teal-500" />
+
+      <div className="bg-white rounded-2xl shadow-lg border border-blue-100 w-full max-w-md p-8">
+        {/* Brand */}
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-blue-600 text-xl font-bold">✚</span>
+          <h1 className="text-2xl font-bold text-slate-900">CareChat</h1>
+        </div>
+        <p className="text-slate-500 text-sm mb-7">AI Assistant for Clinical Professionals</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-slate-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
+              placeholder="you@hospital.org"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Password
-            </label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-slate-200 rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`${inputClass} pr-14`}
+                placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs select-none"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-medium select-none transition"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && (
+            <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 transition shadow-sm mt-2"
           >
             Sign In
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-slate-500">
+        <p className="mt-5 text-sm text-slate-500">
           No account?{" "}
-          <Link to="/register" className="text-blue-600 hover:underline">
+          <Link to="/register" className="text-blue-600 hover:underline font-medium">
             Register here
+          </Link>
+        </p>
+
+        <p className="mt-3 text-sm text-slate-500">
+          <Link to="/" className="text-slate-400 hover:text-slate-600 transition">
+            ← Back to home
           </Link>
         </p>
       </div>
