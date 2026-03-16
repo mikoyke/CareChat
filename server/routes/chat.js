@@ -80,6 +80,7 @@ router.post("/message", authenticate, async (req, res) => {
     const messageId = saved.rows[0].id;
 
     // 8. 发送来源，再发 done
+    console.log('Sending sources:', sources);
     if (sources.length > 0) {
       res.write(`data: ${JSON.stringify({ sources })}\n\n`);
     }

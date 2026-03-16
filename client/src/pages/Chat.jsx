@@ -146,6 +146,7 @@ export default function Chat() {
         for (const line of lines) {
           try {
             const data = JSON.parse(line.replace("data: ", ""));
+            console.log('SSE event:', data);
 
             if (data.sources) {
               pendingSources = data.sources;
