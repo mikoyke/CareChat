@@ -132,6 +132,7 @@ export default function Chat() {
       const decoder = new TextDecoder();
 
       let finished = false;
+      let pendingSources = [];
       while (!finished) {
         const { done, value } = await reader.read();
 
@@ -146,6 +147,10 @@ export default function Chat() {
           try {
             const data = JSON.parse(line.replace("data: ", ""));
 
+            if (data.sources) {
+              pendingSources = data.sources;
+            }
+
             if (data.done) {
               finished = true;
               setIsStreaming(false);
@@ -153,7 +158,7 @@ export default function Chat() {
                 setMessages((prev) =>
                   prev.map((m) =>
                     m.tempId === aiTempId
-                      ? { ...m, id: data.messageId, sources: data.sources || [] }
+                      ? { ...m, id: data.messageId, sources: pendingSources }
                       : m,
                   ),
                 );

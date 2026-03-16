@@ -79,8 +79,11 @@ router.post("/message", authenticate, async (req, res) => {
     );
     const messageId = saved.rows[0].id;
 
-    // 8. 流结束，把 messageId 一起发给前端
-    res.write(`data: ${JSON.stringify({ done: true, messageId, sources })}\n\n`);
+    // 8. 发送来源，再发 done
+    if (sources.length > 0) {
+      res.write(`data: ${JSON.stringify({ sources })}\n\n`);
+    }
+    res.write(`data: ${JSON.stringify({ done: true, messageId })}\n\n`);
     res.end();
   } catch (err) {
     console.error("Chat error:", err);

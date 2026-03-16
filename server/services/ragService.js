@@ -33,7 +33,17 @@ async function buildRagContext(query, role) {
   const docs = await searchDocuments(query, role);
   if (docs.length === 0) return { context: "", sources: [] };
 
-  const sources = [...new Set(docs.map((d) => d.source).filter(Boolean))];
+  // Deduplicate by source, keeping highest similarity per file
+  const sourceMap = new Map();
+  for (const d of docs) {
+    if (!d.source) continue;
+    const prev = sourceMap.get(d.source);
+    if (!prev || d.similarity > prev.similarity) {
+      sourceMap.set(d.source, { source: d.source, similarity: parseFloat(Number(d.similarity).toFixed(2)) });
+    }
+  }
+  const sources = [...sourceMap.values()];
+
   const context =
     `\n\nRelevant clinical reference documents:\n` +
     docs

@@ -39,12 +39,11 @@ export default function MessageBubble({ message }) {
           <div className="mt-2 pt-2 border-t border-slate-100 flex flex-wrap gap-1.5">
             {message.sources.map((src) => (
               <span
-                key={src}
-                className="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5"
-                title={src}
+                key={src.source}
+                className="inline-flex items-center gap-1 text-xs text-slate-400 bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5"
+                title={src.source}
               >
-                <span className="text-slate-400">📄</span>
-                {src.replace(/\.[^.]+$/, "")}
+                📄 {src.source.replace(/\.[^.]+$/, "")} · {Math.round(src.similarity * 100)}% match
               </span>
             ))}
           </div>
