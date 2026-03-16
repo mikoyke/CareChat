@@ -1,4 +1,4 @@
-# CareChat 🏥
+# Rondoc 🏥
 
 > AI-powered clinical assistant for nurses and clinical research coordinators (CRCs), built with RAG pipeline and role-based knowledge retrieval.
 
@@ -8,7 +8,7 @@
 
 ## Overview
 
-CareChat is a full-stack AI chat application designed for clinical professionals. Nurses and CRCs receive role-specific AI responses powered by a RAG (Retrieval-Augmented Generation) pipeline that retrieves relevant clinical documents before generating answers.
+Rondoc is a full-stack AI chat application designed for clinical professionals. Nurses and CRCs receive role-specific AI responses powered by a RAG (Retrieval-Augmented Generation) pipeline that retrieves relevant clinical documents before generating answers.
 
 **Demo accounts:**
 | Role | Email | Password |
@@ -94,8 +94,8 @@ Express API (Railway)
 
 ```bash
 # Clone the repository
-git clone https://github.com/mikoyke/CareChat.git
-cd CareChat
+git clone https://github.com/mikoyke/Rondoc.git
+cd Rondoc
 
 # Backend
 cd server
@@ -130,4 +130,4 @@ VITE_API_URL=http://localhost:3001/api
 
 ## Background
 
-Built by a developer with a nursing degree and clinical research coordinator experience. CareChat combines domain expertise with software engineering to address real pain points in clinical workflows — medication queries, protocol interpretation, and adverse event reporting.
+Built by a developer with a nursing degree and clinical research coordinator experience. Rondoc combines domain expertise with software engineering to address real pain points in clinical workflows — medication queries, protocol interpretation, and adverse event reporting.

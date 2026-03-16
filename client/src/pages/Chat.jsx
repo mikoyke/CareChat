@@ -236,7 +236,7 @@ export default function Chat() {
       {/* 左边：对话列表 Sidebar */}
       <div className="w-64 bg-slate-900 flex flex-col">
         <div className="p-4 border-b border-slate-700">
-          <h1 className="text-white font-bold text-lg">CareChat</h1>
+          <h1 className="text-white font-bold text-lg">Rondoc</h1>
           <p className="text-slate-400 text-xs mt-1">
             {user?.role?.toUpperCase()} ·{user?.name}
           </p>

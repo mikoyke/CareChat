@@ -99,7 +99,7 @@ export default function Landing() {
       <nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-3.5 bg-white/80 backdrop-blur border-b border-blue-100 shadow-sm">
         <div className="flex items-center gap-2.5">
           <span className="text-blue-600 text-xl font-bold">✚</span>
-          <span className="font-bold text-lg text-slate-800 tracking-tight">CareChat</span>
+          <span className="font-bold text-lg text-slate-800 tracking-tight">Rondoc</span>
         </div>
         <div className="flex gap-3">
           <Link
@@ -304,7 +304,7 @@ export default function Landing() {
       <footer className="py-8 px-6 border-t border-blue-100 text-center bg-white">
         <div className="flex items-center justify-center gap-2 mb-2">
           <span className="text-blue-600 font-bold">✚</span>
-          <span className="text-sm font-semibold text-slate-700">CareChat</span>
+          <span className="text-sm font-semibold text-slate-700">Rondoc</span>
           <span className="text-slate-300">·</span>
           <span className="text-sm text-slate-400">AI Clinical Assistant</span>
         </div>

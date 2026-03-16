@@ -31,7 +31,7 @@ export default function MessageBubble({ message }) {
         }`}
       >
         {!isUser && (
-          <p className="text-xs font-semibold text-blue-600 mb-1">CareChat AI</p>
+          <p className="text-xs font-semibold text-blue-600 mb-1">Rondoc AI</p>
         )}
         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
 

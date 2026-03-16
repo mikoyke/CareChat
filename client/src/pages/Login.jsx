@@ -38,7 +38,7 @@ export default function Login() {
         {/* Brand */}
         <div className="flex items-center gap-2 mb-1">
           <span className="text-blue-600 text-xl font-bold">✚</span>
-          <h1 className="text-2xl font-bold text-slate-900">CareChat</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Rondoc</h1>
         </div>
         <p className="text-slate-500 text-sm mb-7">AI Assistant for Clinical Professionals</p>
 

@@ -37,7 +37,7 @@ export default function Register() {
           <span className="text-blue-600 text-xl font-bold">✚</span>
           <h1 className="text-2xl font-bold text-slate-900">Create Account</h1>
         </div>
-        <p className="text-slate-500 text-sm mb-7">Join CareChat as a clinical professional</p>
+        <p className="text-slate-500 text-sm mb-7">Join Rondoc as a clinical professional</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
