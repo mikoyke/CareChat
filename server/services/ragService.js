@@ -1,4 +1,4 @@
-const { openAIEmbeddings, OpenAIEmbeddings } = require("@langchain/openai");
+const { OpenAIEmbeddings } = require("@langchain/openai");
 const pool = require("../db");
 
 const embeddings = new OpenAIEmbeddings({
@@ -11,7 +11,7 @@ function toPgVectorLiteral(vec) {
   return `[${safe.join(",")}]`;
 }
 
-async function searchDocuments(query, role, limit, threshold = 0.7) {
+async function searchDocuments(query, role, limit = 5, threshold = 0.7) {
   try {
     const EmbeddingArr = await embeddings.embedQuery(query);
 
