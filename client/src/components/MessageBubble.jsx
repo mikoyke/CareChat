@@ -35,6 +35,21 @@ export default function MessageBubble({ message }) {
         )}
         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
 
+        {!isUser && message.sources?.length > 0 && (
+          <div className="mt-2 pt-2 border-t border-slate-100 flex flex-wrap gap-1.5">
+            {message.sources.map((src) => (
+              <span
+                key={src}
+                className="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5"
+                title={src}
+              >
+                <span className="text-slate-400">📄</span>
+                {src.replace(/\.[^.]+$/, "")}
+              </span>
+            ))}
+          </div>
+        )}
+
         {canRate && (
           <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100">
             <button

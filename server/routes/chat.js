@@ -31,7 +31,7 @@ router.post("/message", authenticate, async (req, res) => {
     );
 
     const history = historyResult.rows;
-    const [systemPrompt, ragContext] = await Promise.all([
+    const [systemPrompt, { context: ragContext, sources }] = await Promise.all([
       getSystemPrompt(userRole),
       buildRagContext(content, userRole),
     ]);
@@ -80,7 +80,7 @@ router.post("/message", authenticate, async (req, res) => {
     const messageId = saved.rows[0].id;
 
     // 8. 流结束，把 messageId 一起发给前端
-    res.write(`data: ${JSON.stringify({ done: true, messageId })}\n\n`);
+    res.write(`data: ${JSON.stringify({ done: true, messageId, sources })}\n\n`);
     res.end();
   } catch (err) {
     console.error("Chat error:", err);

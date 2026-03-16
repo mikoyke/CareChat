@@ -152,7 +152,9 @@ export default function Chat() {
               if (data.messageId) {
                 setMessages((prev) =>
                   prev.map((m) =>
-                    m.tempId === aiTempId ? { ...m, id: data.messageId } : m,
+                    m.tempId === aiTempId
+                      ? { ...m, id: data.messageId, sources: data.sources || [] }
+                      : m,
                   ),
                 );
               }

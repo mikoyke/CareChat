@@ -18,7 +18,7 @@ async function searchDocuments(query, role, limit, threshold = 0.7) {
     const embeddingLiteral = toPgVectorLiteral(EmbeddingArr);
 
     const result = await pool.query(
-      `SELECT content, 1-(embedding <=> $1::vector) as similarity FROM documents WHERE role = $2 AND 1-(embedding <=> $1::vector) > $3 ORDER BY embedding <=> $1::vector LIMIT $4`,
+      `SELECT content, metadata->>'source' as source, 1-(embedding <=> $1::vector) as similarity FROM documents WHERE role = $2 AND 1-(embedding <=> $1::vector) > $3 ORDER BY embedding <=> $1::vector LIMIT $4`,
       [embeddingLiteral, role, threshold, limit],
     );
 
@@ -31,17 +31,19 @@ async function searchDocuments(query, role, limit, threshold = 0.7) {
 
 async function buildRagContext(query, role) {
   const docs = await searchDocuments(query, role);
-  if (docs.length === 0) return "";
+  if (docs.length === 0) return { context: "", sources: [] };
 
-  return (
-    `\n\nRelevent clinical reference documents:\n` +
+  const sources = [...new Set(docs.map((d) => d.source).filter(Boolean))];
+  const context =
+    `\n\nRelevant clinical reference documents:\n` +
     docs
       .map(
         (r, i) =>
-          `[Documents ${i + 1}](similarity:${r.similarity.toFixed(2)})\n${r.content}`,
+          `[Document ${i + 1}](similarity:${r.similarity.toFixed(2)})\n${r.content}`,
       )
-      .join("\n\n")
-  );
+      .join("\n\n");
+
+  return { context, sources };
 }
 
 module.exports = {
