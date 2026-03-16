@@ -11,7 +11,7 @@ function toPgVectorLiteral(vec) {
   return `[${safe.join(",")}]`;
 }
 
-async function searchDocuments(query, role, limit = 5, threshold = 0.7) {
+async function searchDocuments(query, role, limit = 5, threshold = 0.5) {
   try {
     const EmbeddingArr = await embeddings.embedQuery(query);
 
