@@ -14,7 +14,9 @@ export default function Chat() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [editingConvId, setEditingConvId] = useState(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const [sessionDoc, setSessionDoc] = useState(null); // { name, base64, mimetype }
   const messagesEndRef = useRef(null);
+  const docInputRef = useRef(null);
 
   // 页面加载时获取所有对话
   useEffect(() => {
@@ -118,6 +120,11 @@ export default function Chat() {
         body: JSON.stringify({
           conversationId: currentConvId,
           content: contentToSend,
+          ...(sessionDoc && {
+            documentBase64: sessionDoc.base64,
+            documentName: sessionDoc.name,
+            documentMimetype: sessionDoc.mimetype,
+          }),
         }),
       });
 
@@ -227,6 +234,20 @@ export default function Chat() {
       setEditingConvId(null);
     }
   };
+  const handleDocUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result; // "data:<mime>;base64,<data>"
+      const base64 = dataUrl.split(",")[1];
+      setSessionDoc({ name: file.name, base64, mimetype: file.type });
+    };
+    reader.readAsDataURL(file);
+    // reset input so same file can be re-selected
+    e.target.value = "";
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
@@ -349,7 +370,18 @@ export default function Chat() {
               : "🔬Clinical Research Assistant"}
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            {user?.role === "nurse"
+            {sessionDoc ? (
+              <span className="inline-flex items-center gap-1 text-blue-600">
+                📄 {sessionDoc.name} loaded
+                <button
+                  onClick={() => setSessionDoc(null)}
+                  className="ml-1 text-slate-400 hover:text-red-400 transition"
+                  title="Remove document"
+                >
+                  ✕
+                </button>
+              </span>
+            ) : user?.role === "nurse"
               ? "Medication queries, nursing procedures, clinical questions"
               : "Protocol interpretation, IRB processes, adverse event reporting"}
           </p>
@@ -395,7 +427,44 @@ export default function Chat() {
         </div>
         {/* 底部输入框 */}
         <div className="bg-white border-t border-slate-200 px-6 py-4">
+          {/* Session doc badge */}
+          {sessionDoc && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-3 py-1">
+                📄 {sessionDoc.name}
+                <button
+                  onClick={() => setSessionDoc(null)}
+                  className="text-blue-400 hover:text-red-400 transition ml-0.5"
+                  title="Remove"
+                >
+                  ✕
+                </button>
+              </span>
+            </div>
+          )}
+
           <div className="flex space-x-3">
+            {/* Hidden file input */}
+            <input
+              ref={docInputRef}
+              type="file"
+              accept=".pdf,.txt"
+              onChange={handleDocUpload}
+              className="hidden"
+            />
+
+            {/* Paperclip button */}
+            <button
+              onClick={() => docInputRef.current?.click()}
+              disabled={isStreaming}
+              title="Attach document (PDF or TXT)"
+              className="flex-shrink-0 text-slate-400 hover:text-blue-500 transition disabled:opacity-40 self-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              </svg>
+            </button>
+
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -407,19 +476,18 @@ export default function Chat() {
               }
               rows={2}
               className="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            ></textarea>
+            />
 
             <button
               onClick={sendMessage}
               disabled={isStreaming || !input.trim()}
               className="bg-blue-600 text-white px-5 rounded-xl hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {" "}
               Send
             </button>
           </div>
           <p className="text-xs text-slate-400 mt-2">
-            Press Enter to send, Shift+Enter for new line
+            Press Enter to send, Shift+Enter for new line · 📎 attach a PDF or TXT to analyze
           </p>
         </div>
       </div>

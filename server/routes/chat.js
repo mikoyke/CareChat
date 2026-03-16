@@ -1,9 +1,21 @@
 const express = require("express");
 const OpenAI = require("openai");
+const pdfParse = require("pdf-parse");
 const pool = require("../db");
 const { authenticate } = require("../middleware/auth");
 const { buildRagContext } = require("../services/ragService");
 const router = express.Router();
+
+const SESSION_DOC_MAX_CHARS = 100000;
+
+async function extractDocText(base64, mimetype) {
+  const buffer = Buffer.from(base64, "base64");
+  if (mimetype === "application/pdf") {
+    const data = await pdfParse(buffer);
+    return data.text || "";
+  }
+  return buffer.toString("utf-8");
+}
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -20,7 +32,7 @@ async function getSystemPrompt(role) {
 
 // 发送消息，流式输出
 router.post("/message", authenticate, async (req, res) => {
-  const { conversationId, content } = req.body;
+  const { conversationId, content, documentBase64, documentName, documentMimetype } = req.body;
   const { role: userRole } = req.user;
 
   try {
@@ -36,9 +48,26 @@ router.post("/message", authenticate, async (req, res) => {
       buildRagContext(content, userRole),
     ]);
 
+    // Build session-document context (uploaded in this chat session, not stored in KB)
+    let sessionDocContext = "";
+    if (documentBase64 && documentMimetype) {
+      let docText = await extractDocText(documentBase64, documentMimetype);
+      let truncated = false;
+      if (docText.length > SESSION_DOC_MAX_CHARS) {
+        docText = docText.slice(0, SESSION_DOC_MAX_CHARS);
+        truncated = true;
+      }
+      docText = docText.replace(/\u0000/g, "").trim();
+      sessionDocContext =
+        `\n\nThe user has uploaded a document for analysis` +
+        (documentName ? ` ("${documentName}")` : "") +
+        (truncated ? " [truncated to 100 000 chars]" : "") +
+        `:\n\n${docText}\n\nAnswer questions based on this document.`;
+    }
+
     // 2. 构建发给 OpenAI 的消息数组
     const messages = [
-      { role: "system", content: systemPrompt + ragContext },
+      { role: "system", content: systemPrompt + ragContext + sessionDocContext },
       ...history,
       { role: "user", content },
     ];
