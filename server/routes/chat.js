@@ -109,7 +109,6 @@ router.post("/message", authenticate, async (req, res) => {
     const messageId = saved.rows[0].id;
 
     // 8. 流结束
-    console.log('Sending done with sources:', sources);
     res.write(`data: ${JSON.stringify({ done: true, messageId, sources })}\n\n`);
     res.end();
   } catch (err) {

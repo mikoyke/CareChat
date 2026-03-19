@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-CareChat is a full-stack AI-powered clinical decision support application for healthcare professionals (nurses and clinical research coordinators). It uses a RAG pipeline to provide role-specific AI assistance based on uploaded documents.
+Rondoc is a full-stack AI-powered clinical decision support application for healthcare professionals (nurses and clinical research coordinators). It uses a RAG pipeline to provide role-specific AI assistance based on uploaded documents.
 
 ## Monorepo Structure
 

@@ -31,8 +31,7 @@ async function searchDocuments(query, role, limit = 5, threshold = 0.5) {
 
 async function buildRagContext(query, role) {
   const docs = await searchDocuments(query, role);
-  console.log(`RAG: found ${docs.length} docs for role=${role}, query="${query.slice(0, 60)}"`);
-  if (docs.length === 0) return { context: "", sources: [] };
+if (docs.length === 0) return { context: "", sources: [] };
 
   // Deduplicate by source, keeping highest similarity per file
   const sourceMap = new Map();

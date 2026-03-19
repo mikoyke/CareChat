@@ -17,6 +17,8 @@ export default function Chat() {
   const [sessionDoc, setSessionDoc] = useState(null); // { name, base64, mimetype }
   const messagesEndRef = useRef(null);
   const docInputRef = useRef(null);
+  const conversationsRef = useRef(conversations);
+  useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
 
   // 页面加载时获取所有对话
   useEffect(() => {
@@ -74,8 +76,18 @@ export default function Chat() {
   const sendMessage = async () => {
     if (!input.trim() || isStreaming || !currentConvId) return;
 
-    if (messages.length === 0) {
-      const title = input.slice(0, 40) + (input.length > 40 ? "..." : "");
+    const latestConversations = conversationsRef.current;
+    const currentConv = latestConversations.find((c) => c.id === currentConvId);
+    if (messages.length === 0 && currentConv?.title === "New Conversation") {
+      let title = input.slice(0, 40) + (input.length > 40 ? "..." : "");
+      const existingTitles = new Set(
+        latestConversations.filter((c) => c.id !== currentConvId).map((c) => c.title)
+      );
+      if (existingTitles.has(title)) {
+        let counter = 2;
+        while (existingTitles.has(`${title} (${counter})`)) counter++;
+        title = `${title} (${counter})`;
+      }
       try {
         await api.patch(`/chat/conversations/${currentConvId}`, { title });
         setConversations((prev) =>
@@ -152,8 +164,6 @@ export default function Chat() {
         for (const line of lines) {
           try {
             const data = JSON.parse(line.replace("data: ", ""));
-            console.log('SSE event:', data);
-
             if (data.done) {
               finished = true;
               setIsStreaming(false);
