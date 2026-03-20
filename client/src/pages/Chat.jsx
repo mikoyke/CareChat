@@ -268,8 +268,8 @@ export default function Chat() {
   return (
     <div className="flex h-screen bg-slate-50">
       {/* 左边：对话列表 Sidebar */}
-      <div className="w-64 bg-slate-900 flex flex-col">
-        <div className="p-4 border-b border-slate-700">
+      <div className="w-64 bg-[#082f49] flex flex-col">
+        <div className="p-4 border-b border-sky-900">
           <h1 className="text-white font-bold text-lg">Rondoc</h1>
           <p className="text-slate-400 text-xs mt-1">
             {user?.role?.toUpperCase()} ·{user?.name}
@@ -278,14 +278,14 @@ export default function Chat() {
         <div className="p-3">
           <button
             onClick={createNewConversation}
-            className="w-full bg-blue-600 text-white rounded-lg py-2 text-sm hover:bg-blue-700 transition"
+            className="w-full bg-sky-600 text-white rounded-lg py-2 text-sm hover:bg-sky-700 transition"
           >
             + New Conversation
           </button>
           {user?.role === "admin" && (
             <button
               onClick={() => navigate("/documents")}
-              className="w-full text-left text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg px-3 py-2 text-sm transition mt-1"
+              className="w-full text-left text-slate-400 hover:text-white hover:bg-sky-900 rounded-lg px-3 py-2 text-sm transition mt-1"
             >
               Knowledge Base
             </button>
@@ -293,7 +293,7 @@ export default function Chat() {
           {user?.role === "admin" && (
             <button
               onClick={() => navigate("/prompt")}
-              className="w-full text-left text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg px-3 py-2 text-sm transition mt-1"
+              className="w-full text-left text-slate-400 hover:text-white hover:bg-sky-900 rounded-lg px-3 py-2 text-sm transition mt-1"
             >
               System Prompt
             </button>
@@ -306,8 +306,8 @@ export default function Chat() {
               key={conv.id}
               className={`group flex items-center justify-between rounded-lg px-3 py-2 transition ${
                 currentConvId === conv.id
-                  ? "bg-slate-700"
-                  : "hover:bg-slate-800"
+                  ? "bg-sky-800"
+                  : "hover:bg-sky-900"
               }`}
             >
               {editingConvId === conv.id ? (
@@ -321,7 +321,7 @@ export default function Chat() {
                     if (e.key === "Enter") saveTitle(conv.id);
                     if (e.key === "Escape") setEditingConvId(null);
                   }}
-                  className="flex-1 bg-slate-600 text-white text-sm rounded px-2 py-0.5 outline-none"
+                  className="flex-1 bg-sky-800 text-white text-sm rounded px-2 py-0.5 outline-none"
                 />
               ) : (
                 // 正常模式：显示标题
@@ -357,7 +357,7 @@ export default function Chat() {
           ))}
         </div>
 
-        <div className="p-3 border-t border-slate-700">
+        <div className="p-3 border-t border-sky-900">
           <button
             onClick={() => {
               localStorage.removeItem("token");
@@ -423,10 +423,10 @@ export default function Chat() {
             <div className="flex justify-start mb-4">
               <div className="bg-white rounded-2xl px-4 py-3 shadow-sm">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce [animation-delay:0.1s]"></div>
                   <div
-                    className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+                    className="w-2 h-2 bg-sky-400 rounded-full animate-bounce"
                     style={{ animationDelay: "0.2s" }}
                   ></div>
                 </div>
@@ -485,13 +485,13 @@ export default function Chat() {
                   : "Ask about protocols, IRB, adverse events..."
               }
               rows={2}
-              className="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
             />
 
             <button
               onClick={sendMessage}
               disabled={isStreaming || !input.trim()}
-              className="bg-blue-600 text-white px-5 rounded-xl hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-sky-600 text-white px-5 rounded-xl hover:bg-sky-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Send
             </button>

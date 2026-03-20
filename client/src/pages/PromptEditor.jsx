@@ -59,8 +59,8 @@ export default function PromptEditor() {
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
-      <div className="w-64 bg-slate-900 flex flex-col">
-        <div className="p-4 border-b border-slate-700">
+      <div className="w-64 bg-[#082f49] flex flex-col">
+        <div className="p-4 border-b border-sky-900">
           <h1 className="text-white font-bold text-lg">Rondoc</h1>
           <p className="text-slate-400 text-xs mt-1">
             {user?.role?.toUpperCase()} · {user?.name}
@@ -69,13 +69,13 @@ export default function PromptEditor() {
         <div className="p-3 space-y-1">
           <button
             onClick={() => navigate("/chat")}
-            className="w-full text-left text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg px-3 py-2 text-sm transition"
+            className="w-full text-left text-slate-400 hover:text-white hover:bg-sky-900 rounded-lg px-3 py-2 text-sm transition"
           >
             ← Chat
           </button>
         </div>
         <div className="flex-1" />
-        <div className="p-3 border-t border-slate-700">
+        <div className="p-3 border-t border-sky-900">
           <button
             onClick={() => { localStorage.removeItem("token"); window.location.href = "/login"; }}
             className="w-full text-slate-400 text-sm hover:text-white transition"
@@ -104,7 +104,7 @@ export default function PromptEditor() {
               onClick={() => handleTabSwitch(tab)}
               className={`py-3 text-sm font-medium border-b-2 transition ${
                 activeTab === tab
-                  ? "border-blue-600 text-blue-600"
+                  ? "border-sky-600 text-sky-600"
                   : "border-transparent text-slate-500 hover:text-slate-700"
               }`}
             >
@@ -124,14 +124,14 @@ export default function PromptEditor() {
                   setEdits((prev) => ({ ...prev, [activeTab]: e.target.value }));
                   setSaveMsg("");
                 }}
-                className="flex-1 w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="flex-1 w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
                 spellCheck={false}
               />
               <div className="flex items-center gap-3 mt-4">
                 <button
                   onClick={handleSave}
                   disabled={!isDirty || saving}
-                  className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-5 py-2 bg-sky-600 text-white text-sm font-medium rounded-lg hover:bg-sky-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {saving ? "Saving…" : "Save"}
                 </button>
@@ -143,7 +143,7 @@ export default function PromptEditor() {
                   Reset
                 </button>
                 {saveMsg && (
-                  <span className={`text-sm ${saveMsg === "Saved." ? "text-green-600" : "text-red-500"}`}>
+                  <span className={`text-sm ${saveMsg === "Saved." ? "text-sky-600" : "text-red-500"}`}>
                     {saveMsg}
                   </span>
                 )}

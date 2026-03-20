@@ -26,12 +26,12 @@ export default function MessageBubble({ message }) {
       <div
         className={`max-w-[80%] rounded-2xl px-4 py-3 ${
           isUser
-            ? "bg-blue-600 text-white rounded-br-none"
+            ? "bg-sky-600 text-white rounded-br-none"
             : "bg-white text-slate-800 shadow-sm rounded-bl-none"
         }`}
       >
         {!isUser && (
-          <p className="text-xs font-semibold text-blue-600 mb-1">Rondoc AI</p>
+          <p className="text-xs font-semibold text-sky-700 mb-1">Rondoc AI</p>
         )}
         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
 

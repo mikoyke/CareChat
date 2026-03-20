@@ -101,8 +101,8 @@ export default function Documents() {
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
-      <div className="w-64 bg-slate-900 flex flex-col">
-        <div className="p-4 border-b border-slate-700">
+      <div className="w-64 bg-[#082f49] flex flex-col">
+        <div className="p-4 border-b border-sky-900">
           <h1 className="text-white font-bold text-lg">Rondoc</h1>
           <p className="text-slate-400 text-xs mt-1">
             {user?.role?.toUpperCase()} · {user?.name}
@@ -111,13 +111,13 @@ export default function Documents() {
         <div className="p-3 space-y-1">
           <button
             onClick={() => navigate("/chat")}
-            className="w-full text-left text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg px-3 py-2 text-sm transition"
+            className="w-full text-left text-slate-400 hover:text-white hover:bg-sky-900 rounded-lg px-3 py-2 text-sm transition"
           >
             ← Chat
           </button>
         </div>
         <div className="flex-1" />
-        <div className="p-3 border-t border-slate-700">
+        <div className="p-3 border-t border-sky-900">
           <button
             onClick={() => { localStorage.removeItem("token"); window.location.href = "/login"; }}
             className="w-full text-slate-400 text-sm hover:text-white transition"
@@ -149,7 +149,7 @@ export default function Documents() {
                     disabled={uploading}
                     className={`px-4 py-2 font-medium transition ${
                       targetRole === r
-                        ? "bg-blue-600 text-white"
+                        ? "bg-sky-600 text-white"
                         : "bg-white text-slate-500 hover:bg-slate-50"
                     }`}
                   >
@@ -171,7 +171,7 @@ export default function Documents() {
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
                     uploading
                       ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                      : "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+                      : "bg-sky-600 text-white hover:bg-sky-700 cursor-pointer"
                   }`}
                 >
                   {uploading ? "Uploading…" : "Choose file"}
@@ -180,7 +180,7 @@ export default function Documents() {
               <span className="text-xs text-slate-400">PDF or TXT, max 10 MB</span>
             </div>
 
-            {uploadSuccess && <p className="mt-3 text-sm text-green-600">{uploadSuccess}</p>}
+            {uploadSuccess && <p className="mt-3 text-sm text-sky-600">{uploadSuccess}</p>}
             {uploadError && <p className="mt-3 text-sm text-red-500">{uploadError}</p>}
           </div>
 
@@ -218,7 +218,7 @@ export default function Documents() {
                         <td className="px-4 py-3">
                           <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${
                             doc.role === "nurse"
-                              ? "bg-blue-100 text-blue-700"
+                              ? "bg-sky-100 text-sky-700"
                               : "bg-purple-100 text-purple-700"
                           }`}>
                             {doc.role === "nurse" ? "Nurse" : "CRC"}
