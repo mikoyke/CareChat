@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 import { medicalBg } from "./Landing";
 
 const inputClass =
@@ -19,6 +20,7 @@ export default function Register() {
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "nurse" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -27,7 +29,8 @@ export default function Register() {
     setError("");
     try {
       await api.post("/auth/register", form);
-      navigate("/login");
+      await login(form.email, form.password);
+      navigate("/dashboard");
     } catch (error) {
       setError(error.response?.data?.error || "Registration failed");
     }

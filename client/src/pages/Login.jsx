@@ -27,8 +27,8 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      await login(email, password);
-      navigate("/chat");
+      const loggedInUser = await login(email, password);
+      navigate(loggedInUser.role === "admin" ? "/chat" : "/dashboard");
     } catch (err) {
       if (err.response?.status === 401) {
         setError("Invalid email or password");

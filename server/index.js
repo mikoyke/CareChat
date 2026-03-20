@@ -22,6 +22,7 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/chat", require("./routes/chat"));
 app.use("/api/documents", require("./routes/documents"));
 app.use("/api/prompts", require("./routes/prompts"));
+app.use("/api/news", require("./routes/news"));
 
 const { authenticate, authorize } = require("./middleware/auth");
 

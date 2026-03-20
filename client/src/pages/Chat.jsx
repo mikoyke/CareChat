@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import MessageBubble from "../components/MessageBubble";
 import api from "../api/axios";
@@ -7,10 +7,11 @@ import api from "../api/axios";
 export default function Chat() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [conversations, setConversations] = useState([]);
   const [currentConvId, setCurrentConvId] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(location.state?.prompt || "");
   const [isStreaming, setIsStreaming] = useState(false);
   const [editingConvId, setEditingConvId] = useState(null);
   const [editingTitle, setEditingTitle] = useState("");
@@ -34,7 +35,10 @@ export default function Chat() {
     try {
       const res = await api.get("/chat/conversations");
       setConversations(res.data);
-      if (res.data.length > 0) {
+      const targetId = location.state?.convId;
+      if (targetId && res.data.some((c) => c.id === targetId)) {
+        selectConversation(targetId);
+      } else if (res.data.length > 0) {
         selectConversation(res.data[0].id);
       }
     } catch (err) {
@@ -276,6 +280,14 @@ export default function Chat() {
           </p>
         </div>
         <div className="p-3">
+          {user?.role !== "admin" && (
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="w-full text-left text-slate-400 hover:text-white hover:bg-sky-900 rounded-lg px-3 py-2 text-sm transition mb-2"
+            >
+              ← Dashboard
+            </button>
+          )}
           <button
             onClick={createNewConversation}
             className="w-full bg-sky-600 text-white rounded-lg py-2 text-sm hover:bg-sky-700 transition"
